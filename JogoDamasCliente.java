@@ -11,6 +11,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	private final int TAMANHO_TABULEIRO = 8;
 	private final JButton[][] tabuleiroBotoes = new JButton[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
 	private int[][] estadoTabuleiro = new int[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+	private boolean keepPolling = true;
 	private final Icon peca1 = new ImageIcon("/home/hector/dev/pdi/JogoDama/peca1.png");
 	private final Icon peca2 = new ImageIcon("/home/hector/dev/pdi/JogoDama/peca2.png");
 	private JogoDamasRemote remote;
@@ -27,11 +28,11 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 
 		inicializarTabuleiro();
 		addActions();
-		atualizarTabuleiro();
 
 		setVisible(true);
 
 		conectarRMI();
+		new Thread(this::iniciarLoopDePolling).start();
 	}
 
 	private void conectarRMI() {
@@ -50,23 +51,11 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 
 	@Override
 	public void atualizarTabuleiro(int[][] novoEstado) throws RemoteException {
-		System.out.println("atualizarTabuleiro");
 		SwingUtilities.invokeLater(() -> {
-			obterJogadorAtual();
+			System.out.println("atualizarTabuleiro");
 			estadoTabuleiro = novoEstado;
-			for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
-				for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
-					JButton button = tabuleiroBotoes[i][j];
-					int valor = estadoTabuleiro[i][j];
-					if (valor == 1) {
-						button.setIcon(peca1);
-					} else if (valor == 2) {
-						button.setIcon(peca2);
-					} else {
-						button.setIcon(null);
-					}
-				}
-			}
+			atualizarTabuleiro();
+			obterJogadorAtual();
 		});
 	}
 
@@ -133,7 +122,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	}
 
 	private void handlePieceClick(int row, int col) {
-		if (estadoTabuleiro[row][col] == jogador /*&& jogador == jogadorAtual*/) {
+		if (estadoTabuleiro[row][col] == jogador && jogador == jogadorAtual) {
 			selectedRow = row;
 			selectedCol = col;
 			System.out.println("jogadorAtual: " + jogador + " clicou na peça de posição: " + row + ", " + col);
@@ -161,7 +150,30 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		// Este é um exemplo básico, você precisa implementar as regras completas do jogo de damas
 	}
 
+	private void iniciarLoopDePolling() {
+		while (keepPolling) {
+			try {
+				int[][] novoEstado = remote.obterEstadoTabuleiro();
+
+				if (!Arrays.deepEquals(novoEstado, estadoTabuleiro)) {
+					SwingUtilities.invokeLater(() -> {
+						estadoTabuleiro = novoEstado;
+						atualizarTabuleiro();
+						obterJogadorAtual();
+					});
+				}
+				Thread.sleep(100);
+			} catch (RemoteException | InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private void atualizarTabuleiro() {
+		for (int[] linha : estadoTabuleiro) {
+			System.out.println(Arrays.toString(linha));
+		}
+		System.out.println("");
 		for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
 			for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
 				JButton button = tabuleiroBotoes[i][j];
