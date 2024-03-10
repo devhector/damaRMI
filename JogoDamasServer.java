@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class JogoDamasImpl extends UnicastRemoteObject implements JogoDamasRemote {
+public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRemote {
 	private int[][] estadoTabuleiro;
 	private int jogadores = 0;
 	private int jogadorAtual = 1;
 	private List<JogoDamasObserver> observadores;
 	private final int TAMANHO_TABULEIRO = 8;
 
-	public JogoDamasImpl() throws RemoteException {
+	public JogoDamasServer() throws RemoteException {
 		estadoTabuleiro = new int[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
 		observadores = new ArrayList<>();
 	}
@@ -79,7 +79,7 @@ public class JogoDamasImpl extends UnicastRemoteObject implements JogoDamasRemot
 
 	public static void main(String[] args) {
 		try {
-			JogoDamasRemote jogoDamas = new JogoDamasImpl();
+			JogoDamasRemote jogoDamas = new JogoDamasServer();
 			java.rmi.registry.LocateRegistry.createRegistry(1099);
 			java.rmi.registry.LocateRegistry.getRegistry().rebind("JogoDamas", jogoDamas);
 			System.out.println("Servidor JogoDamas pronto.");

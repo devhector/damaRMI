@@ -2,11 +2,11 @@
 
 rodar:
 ```bash
-$ javac JogoDamasImpl.java JogoDamasCliente.java
+$ javac JogoDamasServer.java JogoDamasCliente.java
 ```
 
 ```bash
-java JogoDamasImpl
+java JogoDamasServer
 ```
 
 ```bash
