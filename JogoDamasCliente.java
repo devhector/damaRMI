@@ -12,8 +12,8 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	private final JButton[][] tabuleiroBotoes = new JButton[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
 	private int[][] estadoTabuleiro = new int[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
 	private boolean keepPolling = true;
-	private final Icon peca1 = new ImageIcon("/home/hector/dev/pdi/JogoDama/peca1.png");
-	private final Icon peca2 = new ImageIcon("/home/hector/dev/pdi/JogoDama/peca2.png");
+	private final Icon peca1 = new ImageIcon("peca1.png");
+	private final Icon peca2 = new ImageIcon("peca2.png");
 	private JogoDamasRemote remote;
 	private int jogador = -1;
 	private int jogadorAtual = -1;
@@ -141,9 +141,31 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	}
 
 	private boolean movimentoValido(int fromRow, int fromCol, int toRow, int toCol) {
-		return Math.abs(toRow - fromRow) == 1 && Math.abs(toCol - fromCol) == 1 &&
-				estadoTabuleiro[toRow][toCol] == 0;
+		int deltaX = toCol - fromCol;
+		int deltaY = toRow - fromRow;
+	
+		if (Math.abs(deltaX) == 1 && Math.abs(deltaY) == 1) {
+			if (estadoTabuleiro[toRow][toCol] == 0) {
+				return true; 
+			} 
+		}
+
+		if (Math.abs(deltaX) == 2 && Math.abs(deltaY) == 2) {
+			if (estadoTabuleiro[toRow][toCol] != jogador) {
+				// Verificar se a célula de destino está ocupada pelo oponente
+				int midRow = (fromRow + toRow) / 2;
+				int midCol = (fromCol + toCol) / 2;
+				// Verificar se a célula intermediária contém uma peça do oponente
+				if (estadoTabuleiro[midRow][midCol] != 0 && estadoTabuleiro[midRow][midCol] != jogador) {
+					estadoTabuleiro[midRow][midCol] = 0;
+					return true; 
+				}
+			}
+
+		}
+		return false; 
 	}
+	
 
 	private void verificarVitoria() {
 		// Adicione a lógica de verificação de vitória aqui
