@@ -57,7 +57,7 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 
 	private void trocarJogador(boolean kill) {
 		if(kill){
-			System.out.println("Permanece Johador");
+			System.out.println("Permanece Jogador");
 			return;
 		}
 		System.out.println("trocarJogador");
@@ -73,19 +73,37 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 	public void realizarMovimento(int jogador, int fromRow, int fromCol, int toRow, int toCol, boolean kill) throws RemoteException {
 		estadoTabuleiro[toRow][toCol] = estadoTabuleiro[fromRow][fromCol];
 		estadoTabuleiro[fromRow][fromCol] = 0; // Limpar a posição antiga
+		// trata peça morta
 		if (kill){
 			int midRow = (fromRow + toRow) / 2;
 			int midCol = (fromCol + toCol) / 2;
-			estadoTabuleiro[midRow][midCol] = 0;
+			estadoTabuleiro[midRow][midCol] = 0; 
 		}
 		
-		// Adicione a lógica de troca de turno, verificar vitoria, etc.
+		// TODO verificar vitoria, etc.
 		for (int[] ints : estadoTabuleiro) {
 			System.out.println(Arrays.toString(ints));
 		}
+
 		trocarJogador(kill);
+		if(contarCaracteres(estadoTabuleiro, obterJogadorAtual()) == 0){
+			System.out.println("Vitoria");
+			
+
+		}
 		notificarObservadores();
 	}
+	public int contarCaracteres(int[][] matriz, int caractere) {
+        int contagem = 0;
+        for (int i = 0; i < matriz.length; i++) {
+            for (int j = 0; j < matriz[i].length; j++) {
+                if (matriz[i][j] == caractere) {
+                    contagem++;
+                }
+            }
+        }
+        return contagem;
+    }
 
 	public static void main(String[] args) {
 		try {
@@ -97,4 +115,7 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 			e.printStackTrace();
 		}
 	}
+
+	
 }
+

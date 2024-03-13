@@ -139,7 +139,6 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
 				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill);
 			}
-			// TODO precisa de loop caso um jogador coma uma pe
 			if(enable == 2){
 				kill = true;
 				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
@@ -175,7 +174,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 			if (estadoTabuleiro[toRow][toCol] == 0) {
 				int midRow = (fromRow + toRow) / 2;
 				int midCol = (fromCol + toCol) / 2;
-				// Verificar se a célula intermediária contém uma peça do oponente
+				// Verifica se a célula intermediária contém uma peça do oponente
 				if (estadoTabuleiro[midRow][midCol] != jogador && estadoTabuleiro[midRow][midCol] != 0) {
 					return 2; 
 				}
