@@ -12,8 +12,8 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
     private final JButton[][] tabuleiroBotoes = new JButton[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
     private int[][] estadoTabuleiro = new int[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
     private boolean keepPolling = true;
-    private final Icon peca1 = new ImageIcon("/home/hector/dev/pdi/JogoDama/peca1.png");
-    private final Icon peca2 = new ImageIcon("/home/hector/dev/pdi/JogoDama/peca2.png");
+    private final Icon peca1 = new ImageIcon("./peca1.png");
+    private final Icon peca2 = new ImageIcon("./peca2.png");
     private JogoDamasRemote remote;
     private int jogador = -1;
     private int jogadorAtual = -1;
@@ -124,7 +124,7 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
                     int fromCol = melhorMovimento[1];
                     int toRow = melhorMovimento[2];
                     int toCol = melhorMovimento[3];
-                    boolean kill = 0;
+                    boolean kill = false;
 
                     if(movimentoValido(fromRow, fromCol, toRow, toCol)){
                         
