@@ -55,7 +55,11 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 		}
 	}
 
-	private void trocarJogador() {
+	private void trocarJogador(boolean kill) {
+		if(kill){
+			System.out.println("Permanece Johador");
+			return;
+		}
 		System.out.println("trocarJogador");
 		jogadorAtual = jogadorAtual == 1 ? 2 : 1;
 	}
@@ -79,7 +83,7 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 		for (int[] ints : estadoTabuleiro) {
 			System.out.println(Arrays.toString(ints));
 		}
-		trocarJogador();
+		trocarJogador(kill);
 		notificarObservadores();
 	}
 

@@ -139,11 +139,12 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
 				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill);
 			}
-			// TODO precisa de loop caso um jogador coma uma peça
+			// TODO precisa de loop caso um jogador coma uma pe
 			if(enable == 2){
 				kill = true;
 				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
 				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill);
+				
 			}
 			selectedRow = -1;
 			selectedCol = -1;
