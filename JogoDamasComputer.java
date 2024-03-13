@@ -68,7 +68,7 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
         }
     }
 
-
+    //Inicializa o tabuleiro do jogo.
     private void inicializarTabuleiro() {
         setLayout(new GridLayout(TAMANHO_TABULEIRO, TAMANHO_TABULEIRO));
 
@@ -93,6 +93,7 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
         }
     }
 
+    //verifica se o movimento feito é valido
     private boolean movimentoValido(int fromRow, int fromCol, int toRow, int toCol) {
         return Math.abs(toRow - fromRow) == 1 && Math.abs(toCol - fromCol) == 1 &&
                 estadoTabuleiro[toRow][toCol] == 0;
@@ -103,9 +104,9 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
         // Este é um exemplo básico, você precisa implementar as regras completas do jogo de damas
     }
 
-    private void realizarMovimento(int fromRow, int fromCol, int toRow, int toCol) {
+    private void realizarMovimento(int fromRow, int fromCol, int toRow, int toCol, boolean kill) {
         try {
-            remote.realizarMovimento(jogador, fromRow, fromCol, toRow, toCol);
+            remote.realizarMovimento(jogador, fromRow, fromCol, toRow, toCol, kill);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -123,10 +124,12 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
                     int fromCol = melhorMovimento[1];
                     int toRow = melhorMovimento[2];
                     int toCol = melhorMovimento[3];
+                    boolean kill = 0;
 
                     if(movimentoValido(fromRow, fromCol, toRow, toCol)){
+                        
                         System.out.println("Movimento válido de: " + fromRow + ", " + fromCol + " para " + toRow + ", " + toCol);
-                        realizarMovimento(fromRow, fromCol, toRow, toCol);
+                        realizarMovimento(fromRow, fromCol, toRow, toCol, kill);
                     }
                 }
             }
@@ -136,10 +139,12 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
     private int[] obterMelhorMovimento() {
         int[] melhorMovimento = null;
         int maxPecasAdversarias = 0;
-
+        
+        
         for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
             for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
                 if (estadoTabuleiro[i][j] == jogador) {
+                    
                     // Verificar movimentos possíveis para a peça atual
                     for (int row = 0; row < TAMANHO_TABULEIRO; row++) {
                         for (int col = 0; col < TAMANHO_TABULEIRO; col++) {
@@ -163,7 +168,7 @@ public class JogoDamasComputer extends JFrame implements JogoDamasObserver{
 
         return melhorMovimento;
     }
-
+ 
     private int contarPecasAdversarias(int[][] estado) {
         int count = 0;
         for (int i = 0; i < TAMANHO_TABULEIRO; i++) {

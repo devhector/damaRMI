@@ -66,9 +66,15 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 	}
 
 	@Override
-	public void realizarMovimento(int jogador, int fromRow, int fromCol, int toRow, int toCol) throws RemoteException {
+	public void realizarMovimento(int jogador, int fromRow, int fromCol, int toRow, int toCol, boolean kill) throws RemoteException {
 		estadoTabuleiro[toRow][toCol] = estadoTabuleiro[fromRow][fromCol];
 		estadoTabuleiro[fromRow][fromCol] = 0; // Limpar a posição antiga
+		if (kill){
+			int midRow = (fromRow + toRow) / 2;
+			int midCol = (fromCol + toCol) / 2;
+			estadoTabuleiro[midRow][midCol] = 0;
+		}
+		
 		// Adicione a lógica de troca de turno, verificar vitoria, etc.
 		for (int[] ints : estadoTabuleiro) {
 			System.out.println(Arrays.toString(ints));

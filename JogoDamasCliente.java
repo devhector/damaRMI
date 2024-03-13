@@ -130,42 +130,59 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	}
 
 	private void handleTableClick(int row, int col) throws RemoteException {
+		
 		if (selectedRow != -1 && selectedCol != -1) {
-			if (movimentoValido(selectedRow, selectedCol, row, col)) {
+			boolean kill = false;
+			int enable = movimentoValido(selectedRow, selectedCol, row, col);
+			//seleciona tipo de jogada
+			if (enable == 1) {
 				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
-				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col);
+				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill);
+			}
+			// TODO precisa de loop caso um jogador coma uma peça
+			if(enable == 2){
+				kill = true;
+				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
+				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill);
 			}
 			selectedRow = -1;
 			selectedCol = -1;
 		}
 	}
 
-	private boolean movimentoValido(int fromRow, int fromCol, int toRow, int toCol) {
+	//Verifica se o movimento a ser realiazado é valido
+	private int movimentoValido(int fromRow, int fromCol, int toRow, int toCol) {
+		//calculo para descobrir o deslocameto da peça
 		int deltaX = toCol - fromCol;
 		int deltaY = toRow - fromRow;
-	
+		
+		//impede a peça de voltar
+		if ((estadoTabuleiro[fromRow][fromCol] == 1 && toRow < fromRow)){
+			return 0;
+		}
+		if (estadoTabuleiro[fromRow][fromCol] == 2 && toRow > fromRow){
+			return 0;
+		}
+		//movimento simples
 		if (Math.abs(deltaX) == 1 && Math.abs(deltaY) == 1) {
 			if (estadoTabuleiro[toRow][toCol] == 0) {
-				return true; 
+				return 1; 
 			} 
 		}
-
+		//salto movimento de 2 casas
 		if (Math.abs(deltaX) == 2 && Math.abs(deltaY) == 2) {
-			if (estadoTabuleiro[toRow][toCol] != jogador) {
-				// Verificar se a célula de destino está ocupada pelo oponente
+			if (estadoTabuleiro[toRow][toCol] == 0) {
 				int midRow = (fromRow + toRow) / 2;
 				int midCol = (fromCol + toCol) / 2;
 				// Verificar se a célula intermediária contém uma peça do oponente
-				if (estadoTabuleiro[midRow][midCol] != 0 && estadoTabuleiro[midRow][midCol] != jogador) {
-					estadoTabuleiro[midRow][midCol] = 0;
-					return true; 
+				if (estadoTabuleiro[midRow][midCol] != jogador && estadoTabuleiro[midRow][midCol] != 0) {
+					return 2; 
 				}
 			}
-
 		}
-		return false; 
+		return 0; 
 	}
-	
+
 
 	private void verificarVitoria() {
 		// Adicione a lógica de verificação de vitória aqui
