@@ -1,0 +1,132 @@
+    public static boolean winning(int[][] board){
+        int cpu = 0;
+        int pl = 0;
+
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                if(board[i][j] == 1 || board[i][j] == 3)
+                    cpu++;
+                if(board[i][j] == 2 || board[i][j] == 4)
+                    pl++;
+            }
+        }
+
+        if(cpu > pl)
+            return true;
+        else
+            return false;
+    }
+
+    public static int[][] aggro(int[][] board){
+        int[][] move = new int [2][2];
+        int count = 63;
+        boolean flag = false;
+
+        while(flag == false && count >= 0){
+            if(board[count/8][count%8] == 1 || board[count/8][count%8] == 3){
+                move = checkMoves(count/8,count%8,board);
+                if(move[0][0] != 99)
+                    flag = true;
+            }
+            count--;
+        }
+
+        return move;
+    }
+
+    public static int[][] deff(int[][] board){
+        int[][] move = new int [2][2];
+        int count = 0;
+        boolean flag = false;
+
+        while(flag == false && count < 64){
+            if(board[count/8][count%8] == 1 || board[count/8][count%8] == 3){
+                move = checkMoves(count/8,count%8,board);
+                if(move[0][0] != 99)
+                    flag = true;
+            }
+            count++;
+        }
+
+        return move;
+    }
+
+    public static int[][] checkMoves(int x, int y, int[][] board){
+        int[][] move = {{99,99},{99,99}};
+
+        if(board[x][y] == 3){
+            if(x != 0){
+                if(y != 0)
+                    if(board[x-1][y-1] == 0){
+                        move[0][0] = x;
+                        move[0][1] = y;
+                        move[1][0] = x-1;
+                        move[1][1] = y-1;
+                    }
+                if(y != 7)
+                    if(board[x-1][y+1] == 0){
+                        move[0][0] = x;
+                        move[0][1] = y;
+                        move[1][0] = x-1;
+                        move[1][1] = y+1;
+                    }
+            }
+        }
+
+        if(x != 7){
+            if(y != 0)
+                if(board[x+1][y-1] == 0){
+                    move[0][0] = x;
+                    move[0][1] = y;
+                    move[1][0] = x+1;
+                    move[1][1] = y-1;
+                }
+        
+            if(y != 7)
+                if(board[x+1][y+1] == 0){
+                    move[0][0] = x;
+                    move[0][1] = y;
+                    move[1][0] = x+1;
+                    move[1][1] = y+1;
+                }
+            }
+
+            if(board[x][y] == 3){
+                if(x > 1){
+                    if(y > 1)
+                        if((board[x-1][y-1] == 2 || board[x-1][y-1] == 4) && board[x-2][y-2] == 0){
+                            move[0][0] = x;
+                            move[0][1] = y;
+                            move[1][0] = x-2;
+                            move[1][1] = y-2;
+                        }
+                    if(y < 6)
+                        if((board[x-1][y+1] == 2 || board[x-1][y-1] == 4) && board[x-2][y+2] == 0){
+                            move[0][0] = x;
+                            move[0][1] = y;
+                            move[1][0] = x-2;
+                            move[1][1] = y+2;
+                        }
+                }
+            }
+    
+            if(x < 6){
+                if(y > 1)
+                    if((board[x+1][y-1] == 2 || board[x+1][y-1] == 4) && board[x+2][y-2] == 0){
+                        move[0][0] = x;
+                        move[0][1] = y;
+                        move[1][0] = x+2;
+                        move[1][1] = y-2;
+                    }
+            
+                if(y < 6)
+                    if((board[x+1][y+1] == 2 || board[x+1][y+1] == 4) && board[x+2][y+2] == 0){
+                        move[0][0] = x;
+                        move[0][1] = y;
+                        move[1][0] = x+2;
+                        move[1][1] = y+2;
+                    }
+                }
+
+        return move;
+    }
