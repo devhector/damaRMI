@@ -8,17 +8,17 @@ import java.rmi.registry.Registry;
 import java.util.Arrays;
 
 public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
-	private final int TAMANHO_TABULEIRO = 8;
-	private final JButton[][] tabuleiroBotoes = new JButton[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
-	private int[][] estadoTabuleiro = new int[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
-	private boolean keepPolling = true;
-	private final Icon peca1 = new ImageIcon("peca1.png");
-	private final Icon peca2 = new ImageIcon("peca2.png");
-	private JogoDamasRemote remote;
-	private int jogador = -1;
-	private int jogadorAtual = -1;
-	private int selectedRow = -1;
-	private int selectedCol = -1;
+	protected final int TAMANHO_TABULEIRO = 8;
+	protected final JButton[][] tabuleiroBotoes = new JButton[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+	protected int[][] estadoTabuleiro = new int[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+	protected boolean keepPolling = true;
+	protected final Icon peca1 = new ImageIcon("peca1.png");
+	protected final Icon peca2 = new ImageIcon("peca2.png");
+	protected JogoDamasRemote remote;
+	protected int jogador = -1;
+	protected int jogadorAtual = -1;
+	protected int selectedRow = -1;
+	protected int selectedCol = -1;
 
 	public JogoDamasCliente() {
 		setTitle("Jogo de Damas");
@@ -35,7 +35,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		new Thread(this::iniciarLoopDePolling).start();
 	}
 
-	private void conectarRMI() {
+	protected void conectarRMI() {
 		try {
 			Registry registry = LocateRegistry.getRegistry("localhost", 1099);
 			remote = (JogoDamasRemote) registry.lookup("JogoDamas");
@@ -50,7 +50,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	}
 
 	@Override
-	public void atualizarTabuleiro(int[][] novoEstado) throws RemoteException {
+	public void atualizarTabuleiro(int[][] novoEstado)  {
 		SwingUtilities.invokeLater(() -> {
 			System.out.println("atualizarTabuleiro");
 			estadoTabuleiro = novoEstado;
@@ -59,7 +59,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		});
 	}
 
-	private void obterJogadorAtual() {
+	protected void obterJogadorAtual() {
 		System.out.println("obterJogadorAtual");
 		try {
 			jogadorAtual = remote.obterJogadorAtual();
@@ -69,8 +69,9 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	}
 	
 
-	private void inicializarTabuleiro() {
+	public void inicializarTabuleiro() {
 		setLayout(new GridLayout(TAMANHO_TABULEIRO, TAMANHO_TABULEIRO));
+		
 
 		for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
 			for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
@@ -104,7 +105,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		}
 	}
 
-	private void addActions() {
+	protected void addActions() {
 		for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
 			for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
 				final int row = i;
@@ -121,7 +122,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		}
 	}
 
-	private void handlePieceClick(int row, int col) {
+	protected void handlePieceClick(int row, int col) {
 		if (estadoTabuleiro[row][col] == jogador && jogador == jogadorAtual) {
 			selectedRow = row;
 			selectedCol = col;
@@ -129,20 +130,21 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		}
 	}
 
-	private void handleTableClick(int row, int col) throws RemoteException {
+	protected void handleTableClick(int row, int col) throws RemoteException {
 		
 		if (selectedRow != -1 && selectedCol != -1) {
 			boolean kill = false;
-			int enable = movimentoValido(selectedRow, selectedCol, row, col);
+			boolean CPU = false;
+			int enable = remote.movimentoValido(selectedRow, selectedCol, row, col);
 			//seleciona tipo de jogada
 			if (enable == 1) {
 				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
-				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill);
+				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill, CPU);
 			}
 			if(enable == 2){
 				kill = true;
 				System.out.println("Movimento válido de: " + selectedRow + ", " + selectedCol + " para " + row + ", " + col);
-				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill);
+				remote.realizarMovimento(jogador, selectedRow, selectedCol, row, col, kill, CPU);
 				
 			}
 			selectedRow = -1;
@@ -150,46 +152,13 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		}
 	}
 
-	//Verifica se o movimento a ser realiazado é valido
-	private int movimentoValido(int fromRow, int fromCol, int toRow, int toCol) {
-		//calculo para descobrir o deslocameto da peça
-		int deltaX = toCol - fromCol;
-		int deltaY = toRow - fromRow;
-		
-		//impede a peça de voltar
-		if ((estadoTabuleiro[fromRow][fromCol] == 1 && toRow < fromRow)){
-			return 0;
-		}
-		if (estadoTabuleiro[fromRow][fromCol] == 2 && toRow > fromRow){
-			return 0;
-		}
-		//movimento simples
-		if (Math.abs(deltaX) == 1 && Math.abs(deltaY) == 1) {
-			if (estadoTabuleiro[toRow][toCol] == 0) {
-				return 1; 
-			} 
-		}
-		//salto movimento de 2 casas
-		if (Math.abs(deltaX) == 2 && Math.abs(deltaY) == 2) {
-			if (estadoTabuleiro[toRow][toCol] == 0) {
-				int midRow = (fromRow + toRow) / 2;
-				int midCol = (fromCol + toCol) / 2;
-				// Verifica se a célula intermediária contém uma peça do oponente
-				if (estadoTabuleiro[midRow][midCol] != jogador && estadoTabuleiro[midRow][midCol] != 0) {
-					return 2; 
-				}
-			}
-		}
-		return 0; 
-	}
 
-
-	private void verificarVitoria() {
+	protected void verificarVitoria() {
 		// Adicione a lógica de verificação de vitória aqui
 		// Este é um exemplo básico, você precisa implementar as regras completas do jogo de damas
 	}
 
-	private void iniciarLoopDePolling() {
+	protected void iniciarLoopDePolling() {
 		while (keepPolling) {
 			try {
 				int[][] novoEstado = remote.obterEstadoTabuleiro();
@@ -208,7 +177,7 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 		}
 	}
 
-	private void atualizarTabuleiro() {
+	protected void atualizarTabuleiro() {
 		for (int[] linha : estadoTabuleiro) {
 			System.out.println(Arrays.toString(linha));
 		}

@@ -55,7 +55,24 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 		}
 	}
 
-	private void trocarJogador(boolean kill) {
+	private void reiniciarJogo() throws RemoteException {
+		for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+			for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
+				estadoTabuleiro[i][j] = 0;
+			}
+		}
+		System.out.println("Jogo reiniciado.");
+		for (JogoDamasObserver observer : observadores) {
+			observer.inicializarTabuleiro();
+		}
+	}
+	
+	private void trocarJogador(boolean kill) throws RemoteException {
+		if (!existemMovimentosValidos(jogadorAtual) || contarCaracteres(estadoTabuleiro, jogadorAtual) == 0) {
+			System.out.println("Vitória do jogador " + (jogadorAtual == 1 ? 2 : 1));
+			reiniciarJogo();
+			return;
+		}
 		if(kill){
 			System.out.println("Permanece Jogador");
 			return;
@@ -63,6 +80,7 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 		System.out.println("trocarJogador");
 		jogadorAtual = jogadorAtual == 1 ? 2 : 1;
 	}
+	
 
 	@Override
 	public int obterJogadorAtual() throws RemoteException {
@@ -70,9 +88,10 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 	}
 
 	@Override
-	public void realizarMovimento(int jogador, int fromRow, int fromCol, int toRow, int toCol, boolean kill) throws RemoteException {
+	public void realizarMovimento(int jogador, int fromRow, int fromCol, int toRow, int toCol, boolean kill,boolean CPU) throws RemoteException {
 		estadoTabuleiro[toRow][toCol] = estadoTabuleiro[fromRow][fromCol];
 		estadoTabuleiro[fromRow][fromCol] = 0; // Limpar a posição antiga
+
 		// trata peça morta
 		if (kill){
 			int midRow = (fromRow + toRow) / 2;
@@ -86,12 +105,62 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 		}
 
 		trocarJogador(kill);
-		if(contarCaracteres(estadoTabuleiro, obterJogadorAtual()) == 0){
-			System.out.println("Vitoria");
-			
-
-		}
 		notificarObservadores();
+	}
+
+	public boolean existemMovimentosValidos(int jogador) {
+		for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+			for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
+				if (estadoTabuleiro[i][j] == jogador) {
+					// Verifique todas as direções possíveis para um movimento válido
+					for (int di = -1; di <= 1; di++) {
+						for (int dj = -1; dj <= 1; dj++) {
+							int toRow = i + di;
+							int toCol = j + dj;
+							if (toRow >= 0 && toRow < TAMANHO_TABULEIRO && toCol >= 0 && toCol < TAMANHO_TABULEIRO) {
+								if (movimentoValido(i, j, toRow, toCol) != 0) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	//Verifica se o movimento a ser realiazado é valido
+	public int movimentoValido(int fromRow, int fromCol, int toRow, int toCol) {
+		//calculo para descobrir o deslocameto da peça
+		int deltaX = toCol - fromCol;
+		int deltaY = toRow - fromRow;
+		
+		//impede a peça de voltar
+		if ((estadoTabuleiro[fromRow][fromCol] == 1 && toRow < fromRow || estadoTabuleiro[fromRow][fromCol] == 2 && toRow > fromRow)){
+			return 0;
+		}
+		if (estadoTabuleiro[fromRow][fromCol] == 2 && toRow > fromRow){
+			return 0;
+		}
+		//movimento simples
+		if (Math.abs(deltaX) == 1 && Math.abs(deltaY) == 1) {
+			if (estadoTabuleiro[toRow][toCol] == 0) {
+				return 1; 
+			} 
+		}
+		//salto movimento de 2 casas
+		if (Math.abs(deltaX) == 2 && Math.abs(deltaY) == 2) {
+			if (estadoTabuleiro[toRow][toCol] == 0) {
+				int midRow = (fromRow + toRow) / 2;
+				int midCol = (fromCol + toCol) / 2;
+				// Verifica se a célula intermediária contém uma peça do oponente
+				if (estadoTabuleiro[midRow][midCol] != jogadorAtual && estadoTabuleiro[midRow][midCol] != 0) {
+					return 2; 
+				}
+			}
+		}
+		return 0; 
 	}
 	public int contarCaracteres(int[][] matriz, int caractere) {
         int contagem = 0;
