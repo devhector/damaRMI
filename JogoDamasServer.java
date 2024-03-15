@@ -75,7 +75,7 @@ public class JogoDamasServer extends UnicastRemoteObject implements JogoDamasRem
 		}
 		if(kill){
 			System.out.println("Permanece Jogador");
-			return;
+			//return;
 		}
 		System.out.println("trocarJogador");
 		jogadorAtual = jogadorAtual == 1 ? 2 : 1;

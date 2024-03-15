@@ -153,10 +153,6 @@ public class JogoDamasCliente extends JFrame implements JogoDamasObserver{
 	}
 
 
-	protected void verificarVitoria() {
-		// Adicione a lógica de verificação de vitória aqui
-		// Este é um exemplo básico, você precisa implementar as regras completas do jogo de damas
-	}
 
 	protected void iniciarLoopDePolling() {
 		while (keepPolling) {
